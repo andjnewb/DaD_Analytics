@@ -1,6 +1,7 @@
 from PIL import Image
 from PIL import ImageOps
 from roboflow import Roboflow
+from dotenv import load_dotenv
 import pytesseract
 import numpy as np
 import cv2
@@ -9,7 +10,12 @@ import json
 image_frames = 'image_frames'
 
 def getJsonFromRoboflow(image_name):
-    rf = Roboflow(api_key="mnr8bLySCxMb9jLHFl0f")
+
+    load_dotenv("api.env")
+
+    key = os.getenv('API_KEY')
+
+    rf = Roboflow(api_key=key)
     project = rf.workspace().project("detect-chat-dad")
     model = project.version(1).model
 
@@ -86,14 +92,23 @@ def cropSellerListings(roboJSON, orignal_image):
 
     return clippings
 
+def saveClipsToFile(clips):
+    index = 0
+
+    for clip in clips:
+       clip.save("./test_clips/frame100_" + str(index) + "_.png")
+       index += 1
+
+def convertClipsToStrings(clips):
+
+    listing_strings = []
+
+
+
 
 if __name__ == '__main__':
    json1 = getJsonFromRoboflow("frame100.png")
    clips = cropSellerListings(json1, "frame100.png")
-   index = 0
 
-   for clip in clips:
-       clip.save("./test_clips/frame100_" + str(index) + "_.png")
-       index += 1
 
    
