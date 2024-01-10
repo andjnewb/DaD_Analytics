@@ -9,6 +9,19 @@ import os
 import json
 image_frames = 'image_frames'
 
+#Weapons strings 
+sword_names = ["Arming Sword", "Falchion", "Longsword", "Rapier", "Short Sword", "Viking Sword", "Zweihander"]
+mace_names = ["Flanged Mace", "Morning Star", "Torch", "Quarterstaff", "War Maul"]
+dagger_names = ["Castillon Dagger", "Kris Dagger", "Rondel Dagger", "Stiletto Dagger"]
+polearm_names = ["Bardiche", "Halberd", "Spear"]
+axe_names = ["Battle Axe", "Double Axe", "Felling Axe", "Hatchet", "Horsemans Axe"]
+bow_names = ["Longbow", "Recurve Bow", "Survival Bow"]
+crossbow_names = ["Crossbow", "Hand Crossbow", "Windlass Crossbow"]
+magic_stuff_names = ["Crystal Ball", "Crystal Sword", "Magic Staff", "Spellbook"]
+instrument_names = ["Drum", "Flute", "Lute", "Lyre"]
+shield_names = ["Buckler", "Heater Shield", "Pavise", "Round Shield"]
+
+
 def getJsonFromRoboflow(image_name):
 
     load_dotenv("api.env")
@@ -108,13 +121,30 @@ def convertClipsToStrings(clips):
         text = pytesseract.image_to_string(img1)
         listing_strings.append(text)
     
-    print(*listing_strings, sep='\n')
+    return listing_strings
+
+def checkForSwords(listings):
+
+
+    sword_map = {}
+    #create map for number of each sword
+    for sword in sword_names:
+        sword_map[sword] = 0
+
+    for sword in sword_names:
+        res = [i for i in sword_names if sword in i]
+    print(res)
+
+def checkStringForSubtrings(string, substring):
+    return string.count(substring)
 
 
 if __name__ == '__main__':
-   json1 = getJsonFromRoboflow("frame100.png")
-   clips = cropSellerListings(json1, "frame100.png")
-   convertClipsToStrings(clips)
+   #print(checkStringForSubtrings("The Sword was Sword on the Sword", "Sword"))
+   #json1 = getJsonFromRoboflow("frame100.png")
+   #clips = cropSellerListings(json1, "frame100.png")
+   #listings = convertClipsToStrings(clips)
+   checkForSwords(["Zweihander", "Rapier", "Longsword"])
 
 
    
