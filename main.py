@@ -103,12 +103,18 @@ def convertClipsToStrings(clips):
 
     listing_strings = []
 
-
+    for clip in clips:
+        img1 = np.array(clip)
+        text = pytesseract.image_to_string(img1)
+        listing_strings.append(text)
+    
+    print(*listing_strings, sep='\n')
 
 
 if __name__ == '__main__':
    json1 = getJsonFromRoboflow("frame100.png")
    clips = cropSellerListings(json1, "frame100.png")
+   convertClipsToStrings(clips)
 
 
    
