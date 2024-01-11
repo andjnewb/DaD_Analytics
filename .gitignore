@@ -2,6 +2,8 @@
 interesting_offsets.txt
 image_frames/*.png
 test_clips/*.png
+image_frames/.bmp
+test_clips/*.bmp
 
 DaD-Market-Analytics/
 image_01.png
@@ -11,3 +13,7 @@ dad_store_feed.mkv
 api.env
 scratch
 secrets.txt
+*.bmp
+*.bmp
+image_frames/image_0.bmp
+image_frames/image_1.bmp

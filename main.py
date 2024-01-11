@@ -43,7 +43,7 @@ def sendWeaponVolumeToMongo(weapons):
 
     filter = { }
     try:
-        result = weps.insert_many( weapons)
+        result = weps.insert_many(weapons)
     except MongoClient.errors.OperationFailure:
         print("Error inserting data.")
 
@@ -234,7 +234,8 @@ if __name__ == '__main__':
             checkForMagicStuff(listing, weapon_maps[7])
             checkForInstruments(listing, weapon_maps[8])
             checkForShields(listing, weapon_maps[9])
-        sendWeaponVolumeToMongo(weapon_maps)
+        print(weapon_maps)
+        #sendWeaponVolumeToMongo(weapon_maps)
         image_index += 1
         
 
