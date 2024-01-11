@@ -7,6 +7,12 @@ import numpy as np
 import cv2
 import os
 import json
+import time
+from desktopmagic.screengrab_win32 import (
+	getDisplayRects, saveScreenToBmp, saveRectToBmp, getScreenAsImage,
+	getRectAsImage, getDisplaysAsImages)
+from pymongo.mongo_client import MongoClient
+from pymongo.server_api import ServerApi
 image_frames = 'image_frames'
 
 #Weapons strings 
@@ -21,6 +27,30 @@ magic_stuff_names = ["Ball", "Sword", "Staff", "Spellbook"]
 instrument_names = ["Drum", "Flute", "Lute", "Lyre"]
 shield_names = ["Buckler", "Heater", "Pavise", "Round"]
 
+def sendWeaponVolumeToMongo(weapons):
+    load_dotenv("api.env")
+    username = os.getenv('MONGO_USER')
+    password = os.getenv('MONGO_PASS')
+
+    uri = "mongodb+srv://"+ username + ":" + password + "@dad1.ks3ysrr.mongodb.net/?retryWrites=true&w=majority"
+
+    client = MongoClient(uri, server_api = ServerApi('1'))
+
+    db = client.Dad1
+
+    weps = db["weapons"]
+
+
+    filter = { }
+    try:
+        result = weps.insert_many( weapons)
+    except MongoClient.errors.OperationFailure:
+        print("Error inserting data.")
+
+def captureDaDScreenshot(image_name):
+    rects = getDisplayRects()
+    saveRectToBmp("./image_frames/" + image_name + ".bmp",rects[1])
+
 
 def getJsonFromRoboflow(image_name):
 
@@ -28,56 +58,13 @@ def getJsonFromRoboflow(image_name):
 
     key = os.getenv('API_KEY')
 
+
     rf = Roboflow(api_key=key)
     project = rf.workspace().project("detect-chat-dad")
     model = project.version(1).model
 
-    return model.predict("./image_frames/" + image_name, confidence=40, overlap=30).json()
+    return model.predict("./image_frames/" + image_name + ".bmp", confidence=40, overlap=30).json()
 
-def visualiseFromRoboflow(image_name, predicted_image_name):
-    rf = Roboflow(api_key="mnr8bLySCxMb9jLHFl0f")
-    project = rf.workspace().project("detect-chat-dad")
-    model = project.version(1).model
-
-    model.predict("./image_frames/" + image_name, confidence=40, overlap=30).save(predicted_image_name)
-
-
-def files():
-    try:
-        os.remove(image_frames)
-    except OSError:
-        pass
-
-    if(not os.path.exists(image_frames)):
-        os.makedirs(image_frames)
-    
-    src_vid = cv2.VideoCapture('dad_store_feed.mkv')
-    return(src_vid)
-
-def process(src_vid):
-    #We're going to capture every 100th frame of the video to keep the amount of images reasonable.
-    index = 0
-    while src_vid.isOpened():
-        ret, frame = src_vid.read()
-
-        #Break when we are done reading
-        if not ret:
-            break
-
-        name = './image_frames/frame' + str(index) + '.png'
-
-        #name each frame
-        if index % 100 == 0:
-            print("Extracting frame" + name)
-            cv2.imwrite(name, frame)
-        
-        index += 1
-
-        if(cv2.waitKey(10) & 0xFF == ord('q')):
-            break
-
-    src_vid.release()
-    cv2.destroyAllWindows()
 
 def old_txt_read():
     filename = 'image_01.png'
@@ -91,7 +78,7 @@ def cropSellerListings(roboJSON, orignal_image):
 
     for box in roboJSON["predictions"]:
         img = Image.open("./image_frames/" + orignal_image)
-        #This doesn't work, need to understand the rectangles better
+        
         x1 = box["x"] - (box["width"] / 2)
         x2 = box["x"] + (box["width"] / 2)
         y1 = box["y"] - (box["height"] / 2)
@@ -224,26 +211,40 @@ def checkStringForSubtrings(string, substring):
 
 
 if __name__ == '__main__':
+    quit = 0
+    image_index = 0
     weapon_maps = initWeaponMaps()
+    while(quit == 0):
+        time.sleep(1)
+        captureDaDScreenshot("image_" + str(image_index))
+        
+        
+        json1 = getJsonFromRoboflow("image_" + str(image_index))
+        clips = cropSellerListings(json1, "image_" + str(image_index) + ".bmp")
+        listings = convertClipsToStrings(clips)
 
-    json1 = getJsonFromRoboflow("frame100.png")
-    clips = cropSellerListings(json1, "frame100.png")
-    listings = convertClipsToStrings(clips)
+        for listing in listings:
+            checkForSwords(listing, weapon_maps[0])
+            checkForMaces(listing, weapon_maps[1])
+            checkForDaggers(listing, weapon_maps[2])
+            checkForPolearms(listing, weapon_maps[3])
+            checkForAxes(listing, weapon_maps[4])
+            checkForBows(listing, weapon_maps[5])
+            checkForCrossbows(listing, weapon_maps[6])
+            checkForMagicStuff(listing, weapon_maps[7])
+            checkForInstruments(listing, weapon_maps[8])
+            checkForShields(listing, weapon_maps[9])
+        sendWeaponVolumeToMongo(weapon_maps)
+        image_index += 1
+        
 
-    for listing in listings:
-        checkForSwords(listing, weapon_maps[0])
-        checkForMaces(listing, weapon_maps[1])
-        checkForDaggers(listing, weapon_maps[2])
-        checkForPolearms(listing, weapon_maps[3])
-        checkForAxes(listing, weapon_maps[4])
-        checkForBows(listing, weapon_maps[5])
-        checkForCrossbows(listing, weapon_maps[6])
-        checkForMagicStuff(listing, weapon_maps[7])
-        checkForInstruments(listing, weapon_maps[8])
-        checkForShields(listing, weapon_maps[9])
 
-    print(weapon_maps)
-
+    
+    
+    
+    
+    
+    
    
    
 
