@@ -129,26 +129,120 @@ def checkForSwords(listing, sword_map):
     for sword in sword_map:
         sword_map[sword] += checkStringForSubtrings(listing, sword)
 
+def checkForMaces(listing, mace_map):
+    #create map for number of each mace
     
+    for mace in mace_map:
+        mace_map[mace] += checkStringForSubtrings(listing, mace)    
+
+def checkForDaggers(listing, dagger_map):
+    #create map for number of each dagger
+    
+    for dagger in dagger_map:
+        dagger_map[dagger] += checkStringForSubtrings(listing, dagger)
+
+def checkForPolearms(listing, polearm_map):
+    #create map for number of each sword
+    
+    for polearm in polearm_map:
+        polearm_map[polearm] += checkStringForSubtrings(listing, polearm)
+
+def checkForAxes(listing, axe_map):
+    #create map for number of each sword
+    
+    for axe in axe_map:
+        axe_map[axe] += checkStringForSubtrings(listing, axe)
+
+def checkForBows(listing, bow_map):
+    #create map for number of each sword
+    
+    for bow in bow_map:
+        bow_map[bow] += checkStringForSubtrings(listing, bow)
+
+def checkForCrossbows(listing, crossbow_map):
+    #create map for number of each sword
+    
+    for crossbow in crossbow_map:
+        crossbow_map[crossbow] += checkStringForSubtrings(listing, crossbow)
+
+def checkForMagicStuff(listing, magicstuff_map):
+    #create map for number of each sword
+    
+    for magicitem in magicstuff_map:
+        magicstuff_map[magicitem] += checkStringForSubtrings(listing, magicitem)
+
+def checkForInstruments(listing, instrument_map):
+    #create map for number of each sword
+    
+    for instrument in instrument_map:
+        instrument_map[instrument] += checkStringForSubtrings(listing, instrument)
+
+def checkForShields(listing, shield_map):
+    #create map for number of each sword
+    
+    for shield in shield_map:
+        shield_map[shield] += checkStringForSubtrings(listing, shield)
+
+
+def initWeaponMaps():
+    sword_map = {}
+    mace_map = {}
+    dagger_map = {}
+    polearm_map = {}
+    axe_map = {}
+    bow_map = {}
+    crossbow_map = {}
+    magicstuff_map = {}
+    instrument_map = {}
+    shield_map = {}
+
+    for sword in sword_names:
+        sword_map[sword] = 0
+    for mace in mace_names:
+        mace_map[mace] = 0
+    for dagger in dagger_names:
+        dagger_map[dagger] = 0
+    for polearm in polearm_names:
+        polearm_map[polearm] = 0
+    for axe in axe_names:
+        axe_map[axe] = 0
+    for bow in bow_names:
+        bow_map[bow] = 0
+    for crossbow in crossbow_names:
+        crossbow_map[crossbow] = 0
+    for magicitem in magic_stuff_names:
+        magicstuff_map[magicitem] = 0
+    for instrument in instrument_names:
+        instrument_map[instrument] = 0
+    for shield in shield_names:
+        shield_map[shield] = 0
+    
+    return [sword_map, mace_map, dagger_map, polearm_map, axe_map, bow_map, crossbow_map, magicstuff_map, instrument_map, shield_map]
 
 def checkStringForSubtrings(string, substring):
     return string.count(substring)
 
 
 if __name__ == '__main__':
-    sword_map = {}
-
-    for sword in sword_names:
-        sword_map[sword] = 0
+    weapon_maps = initWeaponMaps()
 
     json1 = getJsonFromRoboflow("frame100.png")
     clips = cropSellerListings(json1, "frame100.png")
     listings = convertClipsToStrings(clips)
 
     for listing in listings:
-        checkForSwords(listing, sword_map)
+        checkForSwords(listing, weapon_maps[0])
+        checkForMaces(listing, weapon_maps[1])
+        checkForDaggers(listing, weapon_maps[2])
+        checkForPolearms(listing, weapon_maps[3])
+        checkForAxes(listing, weapon_maps[4])
+        checkForBows(listing, weapon_maps[5])
+        checkForCrossbows(listing, weapon_maps[6])
+        checkForMagicStuff(listing, weapon_maps[7])
+        checkForInstruments(listing, weapon_maps[8])
+        checkForShields(listing, weapon_maps[9])
 
-    print(sword_map)
+    print(weapon_maps)
 
    
    
