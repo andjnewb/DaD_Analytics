@@ -123,28 +123,35 @@ def convertClipsToStrings(clips):
     
     return listing_strings
 
-def checkForSwords(listings):
-
-
-    sword_map = {}
+def checkForSwords(listing, sword_map):
     #create map for number of each sword
-    for sword in sword_names:
-        sword_map[sword] = 0
+    
+    for sword in sword_map:
+        sword_map[sword] += checkStringForSubtrings(listing, sword)
 
-    for sword in sword_names:
-        res = [i for i in sword_names if sword in i]
-    print(res)
+    
 
 def checkStringForSubtrings(string, substring):
     return string.count(substring)
 
 
 if __name__ == '__main__':
-   #print(checkStringForSubtrings("The Sword was Sword on the Sword", "Sword"))
-   #json1 = getJsonFromRoboflow("frame100.png")
-   #clips = cropSellerListings(json1, "frame100.png")
-   #listings = convertClipsToStrings(clips)
-   checkForSwords(["Zweihander", "Rapier", "Longsword"])
+    sword_map = {}
+
+    for sword in sword_names:
+        sword_map[sword] = 0
+
+    json1 = getJsonFromRoboflow("frame100.png")
+    clips = cropSellerListings(json1, "frame100.png")
+    listings = convertClipsToStrings(clips)
+
+    for listing in listings:
+        checkForSwords(listing, sword_map)
+
+    print(sword_map)
+
+   
+   
 
 
    
