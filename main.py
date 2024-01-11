@@ -10,16 +10,16 @@ import json
 image_frames = 'image_frames'
 
 #Weapons strings 
-sword_names = ["Arming Sword", "Falchion", "Longsword", "Rapier", "Short Sword", "Viking Sword", "Zweihander"]
+sword_names = ["Arming", "Falchion", "Longsword", "Rapier", "Short", "Viking", "Zweihander"]
 mace_names = ["Flanged Mace", "Morning Star", "Torch", "Quarterstaff", "War Maul"]
-dagger_names = ["Castillon Dagger", "Kris Dagger", "Rondel Dagger", "Stiletto Dagger"]
+dagger_names = ["Castillon", "Kris", "Rondel", "Stiletto"]
 polearm_names = ["Bardiche", "Halberd", "Spear"]
-axe_names = ["Battle Axe", "Double Axe", "Felling Axe", "Hatchet", "Horsemans Axe"]
-bow_names = ["Longbow", "Recurve Bow", "Survival Bow"]
-crossbow_names = ["Crossbow", "Hand Crossbow", "Windlass Crossbow"]
-magic_stuff_names = ["Crystal Ball", "Crystal Sword", "Magic Staff", "Spellbook"]
+axe_names = ["Battle", "Double", "Felling", "Hatchet", "Horsemans"]
+bow_names = ["Longbow", "Recurve", "Survival"]
+crossbow_names = ["Crossbow", "Hand", "Windlass"]
+magic_stuff_names = ["Ball", "Sword", "Staff", "Spellbook"]
 instrument_names = ["Drum", "Flute", "Lute", "Lyre"]
-shield_names = ["Buckler", "Heater Shield", "Pavise", "Round Shield"]
+shield_names = ["Buckler", "Heater", "Pavise", "Round"]
 
 
 def getJsonFromRoboflow(image_name):
