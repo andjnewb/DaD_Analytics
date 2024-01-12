@@ -9,6 +9,12 @@ The current data can be viewed here. As this project is under development, the d
 
 (Dark and Darker Weapon Volume Example) https://charts.mongodb.com/charts-project-0-xvjic/public/dashboards/659f7e6c-6593-4a81-819c-b70b648851ee  
 
+# Status  
+The Python program can currently screenshot an image of the game, send that to Roboflow for analysis, and retrieve that analysis and then(using Tesseract) check the strings for instances of a given weapon name.
+Double counting is an issue, and I'm currently debating how to proceed.
+The program can send data to MongoDB successfully, but it gets stuck on some odd type errors if you try to do it in a loop. Somehow, the MongoDB api is backfilling into my local datastructures and re-assinging the types of my weapon amount maps.
+
+
 # Planned features
 At a minimum, I would like to be able to analyze both volume and average prices. One of the issues is that sellers may describe their pricing with any arbitrary string of text.  
 The developers plan on implementing a Auction House style system, which makes me hesistant to put too much effort into the Roboflow model until that comes to fruition.  
