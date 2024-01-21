@@ -1,5 +1,4 @@
 from PIL import Image
-from PIL import ImageOps
 from roboflow import Roboflow
 from dotenv import load_dotenv
 import pytesseract
@@ -8,6 +7,7 @@ import cv2
 import os
 import json
 import time
+import pickle
 from desktopmagic.screengrab_win32 import (
 	getDisplayRects, saveScreenToBmp, saveRectToBmp, getScreenAsImage,
 	getRectAsImage, getDisplaysAsImages)
@@ -27,25 +27,6 @@ magic_stuff_names = ["Ball", "Sword", "Staff", "Spellbook"]
 instrument_names = ["Drum", "Flute", "Lute", "Lyre"]
 shield_names = ["Buckler", "Heater", "Pavise", "Round"]
 
-def sendWeaponVolumeToMongo(weapons):
-    load_dotenv("api.env")
-    username = os.getenv('MONGO_USER')
-    password = os.getenv('MONGO_PASS')
-
-    uri = "mongodb+srv://"+ username + ":" + password + "@dad1.ks3ysrr.mongodb.net/?retryWrites=true&w=majority"
-
-    client = MongoClient(uri, server_api = ServerApi('1'))
-
-    db = client.Dad1
-
-    weps = db["weapons"]
-
-
-    filter = { }
-    try:
-        result = weps.insert_many(weapons)
-    except MongoClient.errors.OperationFailure:
-        print("Error inserting data.")
 
 def captureDaDScreenshot(image_name):
     rects = getDisplayRects()
@@ -170,6 +151,14 @@ def checkForShields(listing, shield_map):
     for shield in shield_map:
         shield_map[shield] += checkStringForSubtrings(listing, shield)
 
+def writeWeaponDataToFile(weapon_maps):
+
+    with open("weapon_data.dat", "wb") as fp:
+        pickle.dump(weapon_maps, fp)
+        print("Weapon data written to file.")
+    
+    fp.close()
+
 
 def initWeaponMaps():
     sword_map = {}
@@ -235,7 +224,7 @@ if __name__ == '__main__':
             checkForInstruments(listing, weapon_maps[8])
             checkForShields(listing, weapon_maps[9])
         print(weapon_maps)
-        #sendWeaponVolumeToMongo(weapon_maps)
+        writeWeaponDataToFile(weapon_maps)
         image_index += 1
         
 
