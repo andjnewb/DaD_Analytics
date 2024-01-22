@@ -1,6 +1,7 @@
 from PIL import Image
 from roboflow import Roboflow
 from dotenv import load_dotenv
+from constants import *
 import pytesseract
 import numpy as np
 import os
@@ -88,6 +89,47 @@ def convertClipsToStrings(clips):
     
     return listing_strings
 
+def formatDataForMongo(weapon_maps, price_maps):
+
+    #List of documents for MongoDB. Each one will have a weapon name, volume, and price.
+    listOfDocs = []
+    
+    sword_vol_map = weapon_maps[WEAPON_LIST_SWORD_INDEX]
+    mace_vol_map = weapon_maps[WEAPON_LIST_MACE_INDEX]
+    dagger_vol_map = weapon_maps[WEAPON_LIST_DAGGER_INDEX]
+    polearm_vol_map = weapon_maps[WEAPON_LIST_POLEARM_INDEX]
+    axe_vol_map = weapon_maps[WEAPON_LIST_AXE_INDEX]
+    bow_vol_map = weapon_maps[WEAPON_LIST_BOW_INDEX]
+    crossbow_vol_map = weapon_maps[WEAPON_LIST_CROSSBOW_INDEX]
+    magicstuff_vol_map = weapon_maps[WEAPON_LIST_MAGICSTUFF_INDEX]
+    instrument_vol_map = weapon_maps[WEAPON_LIST_INSTRUMENT_INDEX]
+    shield_vol_map = weapon_maps[WEAPON_LIST_SHIELD_INDEX]
+
+    #Keep in mind, the price maps aren't an average but the total of all prices found, we'll make some averages later.
+    sword_price_map = weapon_maps[WEAPON_LIST_SWORD_INDEX]
+    mace_price_map = weapon_maps[WEAPON_LIST_MACE_INDEX]
+    dagger_price_map = weapon_maps[WEAPON_LIST_DAGGER_INDEX]
+    polearm_price_map = weapon_maps[WEAPON_LIST_POLEARM_INDEX]
+    axe_price_map = weapon_maps[WEAPON_LIST_AXE_INDEX]
+    bow_price_map = weapon_maps[WEAPON_LIST_BOW_INDEX]
+    crossbow_price_map = weapon_maps[WEAPON_LIST_CROSSBOW_INDEX]
+    magicstuff_price_map = weapon_maps[WEAPON_LIST_MAGICSTUFF_INDEX]
+    instrument_price_map = weapon_maps[WEAPON_LIST_INSTRUMENT_INDEX]
+    shield_price_map = weapon_maps[WEAPON_LIST_SHIELD_INDEX]
+
+    for sword in sword_names:
+        newEntry = dict(Weapon_Name = sword, Volume = sword_vol_map[sword], Average_Price = calculateAveragePrice(sword_vol_map, sword_price_map, sword))
+        listOfDocs.append(newEntry)
+
+
+
+def calculateAveragePrice(weapon_vol_map, weapon_price_map, weapon):
+    if(weapon_vol_map.get(weapon) == None):
+        return 0
+    else:
+        return weapon_price_map[weapon] / weapon_vol_map[weapon]
+
+
 def checkForSwords(listing, sword_map):
     #create map for number of each sword
     
@@ -166,7 +208,7 @@ def checkForPrices(listing, price_map):
                 print("Found a price")
                 #Get rid of anything that isn't a number in the price we found
                 cleaned = ''.join(filter(str.isdigit, priceFound.group()))
-                dagger_map["Kriss Dagger"] = int(cleaned)
+                dagger_map[dagger] = int(cleaned)
 
 
 
@@ -220,16 +262,16 @@ def checkStringForSubstrings(string, substring):
 
 def checkWeaponListingsForVolume(listings):
     for listing in listings:
-            checkForSwords(listing, weapon_maps[0])
-            checkForMaces(listing, weapon_maps[1])
-            checkForDaggers(listing, weapon_maps[2])
-            checkForPolearms(listing, weapon_maps[3])
-            checkForAxes(listing, weapon_maps[4])
-            checkForBows(listing, weapon_maps[5])
-            checkForCrossbows(listing, weapon_maps[6])
-            checkForMagicStuff(listing, weapon_maps[7])
-            checkForInstruments(listing, weapon_maps[8])
-            checkForShields(listing, weapon_maps[9])
+            checkForSwords(listing, weapon_maps[WEAPON_LIST_SWORD_INDEX])
+            checkForMaces(listing, weapon_maps[WEAPON_LIST_MACE_INDEX])
+            checkForDaggers(listing, weapon_maps[WEAPON_LIST_DAGGER_INDEX])
+            checkForPolearms(listing, weapon_maps[WEAPON_LIST_POLEARM_INDEX])
+            checkForAxes(listing, weapon_maps[WEAPON_LIST_AXE_INDEX])
+            checkForBows(listing, weapon_maps[WEAPON_LIST_BOW_INDEX])
+            checkForCrossbows(listing, weapon_maps[WEAPON_LIST_CROSSBOW_INDEX])
+            checkForMagicStuff(listing, weapon_maps[WEAPON_LIST_MAGICSTUFF_INDEX])
+            checkForInstruments(listing, weapon_maps[WEAPON_LIST_INSTRUMENT_INDEX])
+            checkForShields(listing, weapon_maps[WEAPON_LIST_SHIELD_INDEX])
 
 
 
