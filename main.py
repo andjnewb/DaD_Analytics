@@ -12,10 +12,11 @@ from desktopmagic.screengrab_win32 import (
 	getRectAsImage, getDisplaysAsImages)
 image_frames = 'image_frames'
 
+
 #Weapons strings 
 sword_names = ["Arming Sword", "Falchion", "Longsword", "Rapier", "Short Sword", "Viking Sword", "Zweihander"]
 mace_names = ["Flanged Mace", "Morning Star", "Torch", "Quarterstaff", "War Maul"]
-dagger_names = ["Castillon Dagger", "Kris Dagger", "Rondel Dagger", "Stiletto Dagger"]
+dagger_names = ["Castillon Dagger", "Kriss Dagger", "Rondel Dagger", "Stiletto Dagger"]
 polearm_names = ["Bardiche", "Halberd", "Spear"]
 axe_names = ["Battle Axe", "Double Axe", "Felling Axe", "Hatchet", "Horsemans Axe"]
 bow_names = ["Longbow", "Recurve Bow", "Survival Bow"]
@@ -149,19 +150,23 @@ def checkForShields(listing, shield_map):
 
 def checkForPrices(listing, price_map):
 
-    for weapon in dagger_names:
-        nameReg = r"\[" + weapon + r"\]"
-        nameFound = re.search("[" + weapon + "]", listing)
+    #[sword_map, mace_map, dagger_map, polearm_map, axe_map, bow_map, crossbow_map, magicstuff_map, instrument_map, shield_map]
+    dagger_map = price_map[2]
+
+
+    for dagger in dagger_map:
+        nameReg = r"\[" + dagger + r"\]"
+        nameFound = re.search(nameReg, listing)
 
         if(nameFound != None):
-            print("Found a name")
+            print("Found a" + nameFound.group())
             priceFound = re.search(r"[0-9]+.g", listing)
 
             if(priceFound != None):
                 print("Found a price")
                 #Get rid of anything that isn't a number in the price we found
                 cleaned = ''.join(filter(str.isdigit, priceFound.group()))
-                price_map[weapon] = int(cleaned)
+                dagger_map["Kriss Dagger"] = int(cleaned)
 
 
 
@@ -246,8 +251,7 @@ if __name__ == '__main__':
         #listings = convertClipsToStrings(clips)
 
         #checkWeaponListingsForVolume(listings)
-        print(price_maps[0])
-        checkForPrices("[12:02:09 AM]fantapp: [Kriss Dagger] 200g", price_maps[0])
+        checkForPrices("[12:02:09 AM]fantapp: [Kriss Dagger] 200g", price_maps)
         print(price_maps)
         exit()
         #writeWeaponDataToFile(weapon_maps)
