@@ -8,6 +8,8 @@ import os
 import time
 import pickle
 import re
+import mysql.connector
+from mysql.connector import Error
 from desktopmagic.screengrab_win32 import (
 	getDisplayRects, saveScreenToBmp, saveRectToBmp, getScreenAsImage,
 	getRectAsImage, getDisplaysAsImages)
@@ -89,37 +91,49 @@ def convertClipsToStrings(clips):
     
     return listing_strings
 
-def formatDataForMongo(weapon_maps, price_maps, avg_maps):
+def connectToMySQL(db):
 
-    #List of documents for MongoDB. Each one will have a weapon name, volume, and price.
-    listOfDocs = []
-    
-    sword_vol_map = weapon_maps[WEAPON_LIST_SWORD_INDEX]
-    mace_vol_map = weapon_maps[WEAPON_LIST_MACE_INDEX]
-    dagger_vol_map = weapon_maps[WEAPON_LIST_DAGGER_INDEX]
-    polearm_vol_map = weapon_maps[WEAPON_LIST_POLEARM_INDEX]
-    axe_vol_map = weapon_maps[WEAPON_LIST_AXE_INDEX]
-    bow_vol_map = weapon_maps[WEAPON_LIST_BOW_INDEX]
-    crossbow_vol_map = weapon_maps[WEAPON_LIST_CROSSBOW_INDEX]
-    magicstuff_vol_map = weapon_maps[WEAPON_LIST_MAGICSTUFF_INDEX]
-    instrument_vol_map = weapon_maps[WEAPON_LIST_INSTRUMENT_INDEX]
-    shield_vol_map = weapon_maps[WEAPON_LIST_SHIELD_INDEX]
+    load_dotenv("api.env")
+    user_name = os.getenv('SQL_USER')
+    user_password = os.getenv('SQL_PASS')
+    host_name = os.getenv('SQL_HOST')
 
-    #Keep in mind, the price maps aren't an average but the total of all prices found, we'll make some averages later.
-    sword_price_map = weapon_maps[WEAPON_LIST_SWORD_INDEX]
-    mace_price_map = weapon_maps[WEAPON_LIST_MACE_INDEX]
-    dagger_price_map = weapon_maps[WEAPON_LIST_DAGGER_INDEX]
-    polearm_price_map = weapon_maps[WEAPON_LIST_POLEARM_INDEX]
-    axe_price_map = weapon_maps[WEAPON_LIST_AXE_INDEX]
-    bow_price_map = weapon_maps[WEAPON_LIST_BOW_INDEX]
-    crossbow_price_map = weapon_maps[WEAPON_LIST_CROSSBOW_INDEX]
-    magicstuff_price_map = weapon_maps[WEAPON_LIST_MAGICSTUFF_INDEX]
-    instrument_price_map = weapon_maps[WEAPON_LIST_INSTRUMENT_INDEX]
-    shield_price_map = weapon_maps[WEAPON_LIST_SHIELD_INDEX]
+    connection = None
+    try:
+        connection = mysql.connector.connect(host=host_name, user=user_name, passwd = user_password, database = db)
+        print("Connected to database " + db + ".")
+    except Error as err:
+        print(f"Error: '{err}'")
 
-    for sword in sword_names:
-        newEntry = dict(Weapon_Name = sword, Volume = sword_vol_map[sword], Average_Price = avg_maps[sword])
-        listOfDocs.append(newEntry)
+    return connection
+
+def send_update(connection, query, input_data):
+    cursor = connection.cursor()
+
+    try:
+        cursor.execute(query, input_data)
+        connection.commit()
+        print("Querry success, updated ")
+        print(input_data)
+    except Error as err:
+        print(f"Error: '{err}'")
+
+
+def sendDataToMySQL(weapon_maps, price_maps, avg_maps, connection):
+
+   weapon_vol_update = """UPDATE weapons SET weapon_volume = %s WHERE weapon_name = %s"""
+   weapon_avg_update = """UPDATE weapons SET weapon_average_price = %s WHERE weapon_name = %s"""
+
+   ind = 0
+   for type in weapon_maps:
+        for weapon in type:
+            #Update volume
+            vol_data = (weapon_maps[ind][weapon], weapon)
+            send_update(connection, weapon_vol_update, vol_data)
+            #Update price
+            price_data = (price_maps[ind][weapon], weapon)
+            send_update(connection, weapon_avg_update, price_data)
+        ind += 1
 
 
 
@@ -145,22 +159,22 @@ def checkForPrices(listing, price_map):
     dagger_map = price_map[2]
 
 
-    for dagger in dagger_map:
-        nameReg = r"\[" + dagger + r"\]"
-        nameFound = re.search(nameReg, listing)
+    ind = 0
+    for type in price_map:
+        for weapon in type:
+            nameReg = r"\[" + weapon + r"\]"
+            nameFound = re.search(nameReg, listing)
 
-        if(nameFound != None):
-            print("Found a" + nameFound.group())
-            priceFound = re.search(r"[0-9]+.g", listing)
+            if(nameFound != None):
+                print("Found a" + nameFound.group())
+                priceFound = re.search(r"[0-9]+.g", listing)
 
-            if(priceFound != None):
-                print("Found a price")
-                #Get rid of anything that isn't a number in the price we found
-                cleaned = ''.join(filter(str.isdigit, priceFound.group()))
-                dagger_map[dagger] += int(cleaned)
-
-
-
+                if(priceFound != None):
+                    print("Found a price")
+                    #Get rid of anything that isn't a number in the price we found
+                    cleaned = ''.join(filter(str.isdigit, priceFound.group()))
+                    price_map[ind][weapon] += int(cleaned)
+        ind += 1
 
 def writeWeaponDataToFile(weapon_maps):
 
@@ -242,7 +256,7 @@ if __name__ == '__main__':
         #listings = convertClipsToStrings(clips)
 
 
-        listings = ["[12:02:09 AM]fantapp: [Kriss Dagger] 200g", "[12:02:09 AM]fantapp: [Kriss Dagger] 153g", "[12:02:09 AM]fantapp: [Kriss Dagger] 20g"]
+        listings = ["[12:02:09 AM]fantapp: [Longsword] 200g", "[12:02:09 AM]fantapp: [Longsword] 153g", "[12:02:09 AM]fantapp: [Kriss Dagger] 20g"]
 
         checkWeaponListingsForVolume(listings, weapon_maps)
         
@@ -251,8 +265,11 @@ if __name__ == '__main__':
 
         calculateAveragePrices(weapon_maps, price_maps, avg_maps)
 
+        connection = connectToMySQL("DaD_Analytics")
+        sendDataToMySQL(weapon_maps, price_maps, avg_maps, connection)
+        
 
-        print(weapon_maps)
+        print(price_maps)
         exit()
         #writeWeaponDataToFile(weapon_maps)
         #image_index += 1
