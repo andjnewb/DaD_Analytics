@@ -89,7 +89,7 @@ def convertClipsToStrings(clips):
     
     return listing_strings
 
-def formatDataForMongo(weapon_maps, price_maps):
+def formatDataForMongo(weapon_maps, price_maps, avg_maps):
 
     #List of documents for MongoDB. Each one will have a weapon name, volume, and price.
     listOfDocs = []
@@ -118,16 +118,30 @@ def formatDataForMongo(weapon_maps, price_maps):
     shield_price_map = weapon_maps[WEAPON_LIST_SHIELD_INDEX]
 
     for sword in sword_names:
-        newEntry = dict(Weapon_Name = sword, Volume = sword_vol_map[sword], Average_Price = calculateAveragePrice(sword_vol_map, sword_price_map, sword))
+        newEntry = dict(Weapon_Name = sword, Volume = sword_vol_map[sword], Average_Price = avg_maps[sword])
         listOfDocs.append(newEntry)
 
 
 
-def calculateAveragePrice(weapon_vol_map, weapon_price_map, weapon):
-    if(weapon_vol_map.get(weapon) == None):
-        return 0
-    else:
-        return weapon_price_map[weapon] / weapon_vol_map[weapon]
+def calculateAveragePrices(weapon_vol_map, weapon_price_map, avg_maps):
+
+    ind = 0
+    for type in weapon_vol_map:
+        for weapon in type:
+            if weapon_vol_map[ind][weapon] == 0:
+                avg_maps[ind][weapon] = 0
+            else:
+                avg_maps[ind][weapon] = weapon_price_map[ind][weapon] / weapon_vol_map[ind][weapon]
+        ind += 1
+
+
+ 
+
+
+    # if(weapon_vol_map.get(weapon) == 0):
+    #     return 0
+    # else:
+    #     return weapon_price_map[weapon] / weapon_vol_map[weapon]
 
 
 def checkForSwords(listing, sword_map):
@@ -208,7 +222,7 @@ def checkForPrices(listing, price_map):
                 print("Found a price")
                 #Get rid of anything that isn't a number in the price we found
                 cleaned = ''.join(filter(str.isdigit, priceFound.group()))
-                dagger_map[dagger] = int(cleaned)
+                dagger_map[dagger] += int(cleaned)
 
 
 
@@ -283,6 +297,7 @@ if __name__ == '__main__':
     #DRY or something
     weapon_maps = initWeaponMaps()
     price_maps = initWeaponMaps()
+    avg_maps = initWeaponMaps()
     while(quit == 0):
         #time.sleep(1)
         #captureDaDScreenshot("image_" + str(image_index))
@@ -292,9 +307,18 @@ if __name__ == '__main__':
         #clips = cropSellerListings(json1, "image_" + str(image_index) + ".bmp")
         #listings = convertClipsToStrings(clips)
 
-        #checkWeaponListingsForVolume(listings)
-        checkForPrices("[12:02:09 AM]fantapp: [Kriss Dagger] 200g", price_maps)
-        print(price_maps)
+
+        listings = ["[12:02:09 AM]fantapp: [Kriss Dagger] 200g", "[12:02:09 AM]fantapp: [Kriss Dagger] 153g", "[12:02:09 AM]fantapp: [Kriss Dagger] 20g"]
+
+        checkWeaponListingsForVolume(listings)
+        
+        for listing in listings:
+            checkForPrices(listing, price_maps)
+
+        calculateAveragePrices(weapon_maps, price_maps, avg_maps)
+
+
+        print(avg_maps)
         exit()
         #writeWeaponDataToFile(weapon_maps)
         #image_index += 1
