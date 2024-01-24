@@ -274,19 +274,18 @@ def initWeaponMaps():
 def checkStringForSubstrings(string, substring):
     return string.count(substring)
 
-def checkWeaponListingsForVolume(listings):
-    for listing in listings:
-            checkForSwords(listing, weapon_maps[WEAPON_LIST_SWORD_INDEX])
-            checkForMaces(listing, weapon_maps[WEAPON_LIST_MACE_INDEX])
-            checkForDaggers(listing, weapon_maps[WEAPON_LIST_DAGGER_INDEX])
-            checkForPolearms(listing, weapon_maps[WEAPON_LIST_POLEARM_INDEX])
-            checkForAxes(listing, weapon_maps[WEAPON_LIST_AXE_INDEX])
-            checkForBows(listing, weapon_maps[WEAPON_LIST_BOW_INDEX])
-            checkForCrossbows(listing, weapon_maps[WEAPON_LIST_CROSSBOW_INDEX])
-            checkForMagicStuff(listing, weapon_maps[WEAPON_LIST_MAGICSTUFF_INDEX])
-            checkForInstruments(listing, weapon_maps[WEAPON_LIST_INSTRUMENT_INDEX])
-            checkForShields(listing, weapon_maps[WEAPON_LIST_SHIELD_INDEX])
+def checkWeaponListingsForVolume(listings, weapon_maps):
 
+
+    ind = 0
+
+    #How many layers of loops is too evil?
+    for listing in listings:
+        for type in weapon_maps:
+            for weapon in type:
+                weapon_maps[ind][weapon] += checkStringForSubstrings(listing, weapon)
+            ind += 1
+        ind = 0
 
 
 if __name__ == '__main__':
@@ -310,7 +309,7 @@ if __name__ == '__main__':
 
         listings = ["[12:02:09 AM]fantapp: [Kriss Dagger] 200g", "[12:02:09 AM]fantapp: [Kriss Dagger] 153g", "[12:02:09 AM]fantapp: [Kriss Dagger] 20g"]
 
-        checkWeaponListingsForVolume(listings)
+        checkWeaponListingsForVolume(listings, weapon_maps)
         
         for listing in listings:
             checkForPrices(listing, price_maps)
@@ -318,7 +317,7 @@ if __name__ == '__main__':
         calculateAveragePrices(weapon_maps, price_maps, avg_maps)
 
 
-        print(avg_maps)
+        print(weapon_maps)
         exit()
         #writeWeaponDataToFile(weapon_maps)
         #image_index += 1
