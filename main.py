@@ -119,7 +119,7 @@ def send_update(connection, query, input_data):
         print(f"Error: '{err}'")
 
 
-def sendDataToMySQL(weapon_maps, price_maps, avg_maps, connection):
+def sendDataToMySQL(weapon_maps, avg_maps, connection):
 
    weapon_vol_update = """UPDATE weapons SET weapon_volume = %s WHERE weapon_name = %s"""
    weapon_avg_update = """UPDATE weapons SET weapon_average_price = %s WHERE weapon_name = %s"""
@@ -131,7 +131,7 @@ def sendDataToMySQL(weapon_maps, price_maps, avg_maps, connection):
             vol_data = (weapon_maps[ind][weapon], weapon)
             send_update(connection, weapon_vol_update, vol_data)
             #Update price
-            price_data = (price_maps[ind][weapon], weapon)
+            price_data = (avg_maps[ind][weapon], weapon)
             send_update(connection, weapon_avg_update, price_data)
         ind += 1
 
@@ -266,7 +266,7 @@ if __name__ == '__main__':
         calculateAveragePrices(weapon_maps, price_maps, avg_maps)
 
         connection = connectToMySQL("DaD_Analytics")
-        sendDataToMySQL(weapon_maps, price_maps, avg_maps, connection)
+        sendDataToMySQL(weapon_maps, avg_maps, connection)
         
 
         print(price_maps)
