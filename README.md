@@ -10,15 +10,14 @@ The current data can be viewed here. As this project is under development, the d
 (Dark and Darker Weapon Volume Example) https://charts.mongodb.com/charts-project-0-xvjic/public/dashboards/659f7e6c-6593-4a81-819c-b70b648851ee  
 
 # Status  
-The Python program can currently screenshot an image of the game, send that to Roboflow for analysis, and retrieve that analysis and then(using Tesseract) check the strings for instances of a given weapon name.
-Double counting is an issue, and I'm currently debating how to proceed.
-The program can send data to MongoDB successfully, but it gets stuck on some odd type errors if you try to do it in a loop. Somehow, the MongoDB api is backfilling into my local datastructures and re-assinging the types of my weapon amount maps.
+The project has had some major changes here recently. Firstly, I've moved the project from MongoDB to PostgreSQL, currently hosted on Cockroach Labs. It wasn't my first choice, but Cockroach Labs had the best free tier I could find so it went from MongoDB to MySQL to PostgreSQL in the span of a few days. The frontend is still up in the air, as most of the "free services" for this sort of things are actually not free but just trying to hook you in. 
+
+On the python side, the main scripts can now analyze a given image and determine both volume and average price. I'm still having issues getting Docker to work on my machine(therefore I can't infer on images locally), and until I sort that out the project won't be running continously. Any data you see is just from sample runs. 
 
 
 # Planned features
-At a minimum, I would like to be able to analyze both volume and average prices. One of the issues is that sellers may describe their pricing with any arbitrary string of text.  
-The developers plan on implementing a Auction House style system, which makes me hesistant to put too much effort into the Roboflow model until that comes to fruition.  
-For now, I am only working towards making volume accurate.
+At a minimum, I would like to be able to analyze both volume and average prices. One of the issues is that sellers may describe their pricing with any arbitrary string of text. An auction house system is on the way from Ironmace that will hopefully make this easier. I'm not sure if rarity will ever be able to be analyzed, as the game uses a color system for rarity and Tesseract doesn't support color. Whenever the auction house drops, I'll have to redo the Roboflow model. That's part of the fun for developing tools for an in-progress game I suppose.
+
 
 
 # Technology and tools used
@@ -28,4 +27,4 @@ Roboflow (https://universe.roboflow.com/dadproject/detect-chat-dad)
 
 Tesseract OCR  
 
-MongoDB Cloud
+PostgreSQL(Hosted on Cockroach Labs).
