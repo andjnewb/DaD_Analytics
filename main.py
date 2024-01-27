@@ -1,11 +1,12 @@
 from PIL import Image
-from roboflow import Roboflow
+import inference
 from dotenv import load_dotenv
 from constants import *
 import pytesseract
 import numpy as np
 import os
 import time
+import psycopg2
 import pickle
 import re
 import mysql.connector
@@ -30,7 +31,7 @@ shield_names = ["Buckler", "Heater Shield", "Pavise", "Round Shield"]
 
 def captureDaDScreenshot(image_name):
     rects = getDisplayRects()
-    saveRectToBmp("./image_frames/" + image_name + ".bmp",rects[1])
+    saveRectToBmp("./image_frames/" + image_name + ".bmp",rects[0])
 
 
 def getJsonFromRoboflow(image_name):
@@ -40,9 +41,7 @@ def getJsonFromRoboflow(image_name):
     key = os.getenv('API_KEY')
 
 
-    rf = Roboflow(api_key=key)
-    project = rf.workspace().project("detect-chat-dad")
-    model = project.version(1).model
+    model = inference.load_roboflow_model("detect-chat-dad/1")
 
     return model.predict("./image_frames/" + image_name + ".bmp", confidence=40, overlap=30).json()
 
@@ -91,20 +90,13 @@ def convertClipsToStrings(clips):
     
     return listing_strings
 
-def connectToMySQL(db):
+def connectToMySQLCockroach():
 
     load_dotenv("api.env")
-    user_name = os.getenv('SQL_USER')
-    user_password = os.getenv('SQL_PASS')
-    host_name = os.getenv('SQL_HOST')
 
-    connection = None
-    try:
-        connection = mysql.connector.connect(host=host_name, user=user_name, passwd = user_password, database = db)
-        print("Connected to database " + db + ".")
-    except Error as err:
-        print(f"Error: '{err}'")
+    key = os.getenv('COCKROACH_STRING')
 
+    connection = psycopg2.connect("")
     return connection
 
 def send_update(connection, query, input_data):
@@ -238,7 +230,7 @@ def checkWeaponListingsForVolume(listings, weapon_maps):
 
 
 if __name__ == '__main__':
-    quit = 0
+    quit = 0.5
     image_index = 0
 
     #It may seem confusing to initialize volume maps and price maps with the same function, but both price and volume would be the same thing initially, zero.
@@ -248,7 +240,7 @@ if __name__ == '__main__':
     avg_maps = initWeaponMaps()
     while(quit == 0):
         #time.sleep(1)
-        #captureDaDScreenshot("image_" + str(image_index))
+        captureDaDScreenshot("image_" + str(image_index))
         
         
         #json1 = getJsonFromRoboflow("image_" + str(image_index))
@@ -265,7 +257,7 @@ if __name__ == '__main__':
 
         calculateAveragePrices(weapon_maps, price_maps, avg_maps)
 
-        connection = connectToMySQL("DaD_Analytics")
+        connection = connectToMySQLCockroach()
         sendDataToMySQL(weapon_maps, avg_maps, connection)
         
 
