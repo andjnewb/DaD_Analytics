@@ -230,7 +230,7 @@ def checkWeaponListingsForVolume(listings, weapon_maps):
 
 
 if __name__ == '__main__':
-    quit = 0.5
+    quit = 0
     image_index = 0
 
     #It may seem confusing to initialize volume maps and price maps with the same function, but both price and volume would be the same thing initially, zero.

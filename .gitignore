@@ -4,7 +4,7 @@ image_frames/*.png
 test_clips/*.png
 image_frames/.bmp
 test_clips/*.bmp
-
+.venv/
 DaD-Market-Analytics/
 image_01.png
 test.png
